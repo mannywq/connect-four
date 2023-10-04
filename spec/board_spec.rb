@@ -15,10 +15,17 @@ describe Board do
   end
 
   describe '#print_board' do
+    skip
   end
 
   describe '#place_marker' do
-    xit 'accepts a marker' do
+    subject(:board) { described_class.new }
+    it 'accepts a marker' do
+      grid = board.grid
+      grid[0][0] = 'X'
+      board.place_marker('X', 1)
+
+      expect(grid[1][0]).to eq('X')
     end
   end
 
@@ -39,10 +46,8 @@ describe Board do
       grid = board_check.grid
 
       grid.length.times do |i|
-        grid[i][1] = board_check.yellow_circle
+        grid[i][0] = board_check.yellow_circle
       end
-
-      board_check.print_board
 
       expect(board_check.open?(1)).to be false
     end

@@ -1,4 +1,4 @@
-require_relative './markers'
+require_relative 'markers'
 
 class Board
   attr_accessor :grid
@@ -18,8 +18,24 @@ class Board
 
   def open?(col)
     (@grid.length - 1).downto(0) do |i|
-      return true if @grid[i][col] == empty_circle
+      return true if @grid[i][col - 1] == empty_circle
     end
     false
+  end
+
+  def place_marker(marker, col)
+    if open?(col)
+
+      (@grid.length - 1).downto(0) do |row|
+        if @grid[row][col - 1] == empty_circle
+          @grid[row][col - 1] = marker
+          puts "Marker placed at grid #{grid[row][col]}"
+        end
+      end
+    else
+
+      puts 'No open slot'
+
+    end
   end
 end
