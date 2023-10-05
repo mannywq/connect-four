@@ -20,12 +20,23 @@ describe Board do
 
   describe '#place_marker' do
     subject(:board) { described_class.new }
+    before do
+      allow(board).to receive(:open?).and_return(true, false)
+    end
     it 'accepts a marker' do
       grid = board.grid
       grid[0][0] = 'X'
       board.place_marker('X', 1)
 
       expect(grid[1][0]).to eq('X')
+    end
+    it 'prints an error message when the column is full' do
+      $stdout = StringIO.new
+      output = $stdout
+
+      board.place_marker('X', 1)
+
+      expect(output.string).to include('No open slot')
     end
   end
 

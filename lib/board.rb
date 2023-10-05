@@ -29,7 +29,7 @@ class Board
       (@grid.length - 1).downto(0) do |row|
         if @grid[row][col - 1] == empty_circle
           @grid[row][col - 1] = marker
-          puts "Marker placed at grid #{grid[row][col]}"
+          # puts "Marker placed at grid #{grid[row][col]}"
         end
       end
     else
