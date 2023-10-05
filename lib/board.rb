@@ -95,4 +95,8 @@ class Board
     p max
     [length, max].max
   end
+
+  def diag_row(_marker)
+    1
+  end
 end

@@ -150,8 +150,25 @@ describe Board do
 
       expect(row_board.hor_row(marker)).to eq 3
     end
+    it 'should return 4 if the number of markers in a row is 4 or more' do
+      marker = 'O'
+      5.times { |num| row_board.place_marker(marker, num + 1) }
+      row_board.place_marker('X', 6)
+      row_board.place_marker('X', 7)
+      row_board.print_board
+
+      expect(row_board.hor_row(marker)).to eq 4
+    end
   end
 
-  describe 'diag_row' do
+  describe '#diag_row' do
+    let(:row_board) { described_class.new }
+    it 'should return 1 when only 1 marker is found on a diagonal row' do
+      marker = 'X'
+
+      row_board.place_marker(marker, 1)
+
+      expect(row_board.diag_row(marker)).to eq 1
+    end
   end
 end
