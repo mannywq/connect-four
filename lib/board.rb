@@ -96,7 +96,91 @@ class Board
     [length, max].max
   end
 
-  def diag_row(_marker)
-    1
+  def diag_up(marker, _start_col = 1)
+    length = 0
+    max = 0
+    visited = []
+
+    (@grid.length - 1).downto(0) do |row|
+      (@grid[0].length - 1).downto(0) do |col|
+        next unless @grid[row][col] == marker
+        next if visited.include?([row, col])
+
+        puts "Found marker at #{row}, #{col}"
+        visited << [row, col]
+        length = 1
+        max = [length, max].max
+
+        length = count_up([row, col], marker, visited)
+        max = [length, max].max
+      end
+    end
+    puts "Max is #{max}"
+    max
+  end
+
+  def count_up(pos, marker, visited)
+    row, col = pos
+    row_inc = 1
+    col_inc = 1
+    length = 1
+
+    while (row - row_inc).positive? && (col + col_inc) < (@grid[0].length - 1)
+      @grid[row - row_inc][col + col_inc] == marker ? length += 1 : break
+      visited << [(row - row_inc), (col + col_inc)]
+      puts "Length is now #{length}"
+      return 4 if length == 4
+
+      row_inc += 1
+      col_inc += 1
+
+    end
+    puts "Returning #{length}"
+    length
+  end
+
+  def diag_down(marker)
+    length = 0
+    max = 0
+    inc = 1
+    visited = []
+
+    @grid.each_with_index do |row, ri|
+      row.each_with_index do |_col, ci|
+        next unless @grid[ri][ci] == marker
+
+        next if visited.include?([ri, ci])
+
+        puts "Found marker at #{ri}, #{ci}"
+
+        visited << [ri, ci]
+        length += 1
+
+        max = [length, max].max
+
+        while (ri + inc) < (@grid.length - 1) && (ci + inc) < @grid[ri].length
+
+          @grid[ri + inc][ci + inc] == marker ? length += 1 : break
+          visited << [(ri + inc), (ci + inc)]
+          puts "Length is now #{length}"
+          max = [length, max].max
+
+          return 4 if length == 4
+
+          inc += 1
+
+        end
+      end
+    end
+    max
+  end
+
+  def diag_row(marker)
+    puts 'Checking rising'
+    up = diag_up(marker)
+    puts 'Checking falling'
+    down = diag_down(marker)
+
+    [up, down].max
   end
 end
