@@ -245,7 +245,7 @@ describe Board do
   end
   describe '#diag_row' do
     let(:row_board) { described_class.new }
-    xit 'should return the longest number of diag matches for a marker' do
+    it 'should return the longest number of diag matches for a marker' do
       marker = 'X'
       marker2 = 'O'
 

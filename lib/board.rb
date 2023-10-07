@@ -139,10 +139,28 @@ class Board
     length
   end
 
+  def count_down(pos, marker, visited)
+    row, col = pos
+    inc = 1
+    length = 1
+
+    while (row + inc) <= (@grid.length - 1) && (col + inc) <= (@grid[0].length - 1)
+      @grid[row + inc][col + inc] == marker ? length += 1 : break
+      visited << [(row + inc), (col + inc)]
+      puts "Length is now #{length}"
+      return 4 if length == 4
+
+      inc += 1
+
+    end
+    puts "Returning #{length}"
+    length
+  end
+
   def diag_down(marker)
     length = 0
     max = 0
-    inc = 1
+    # inc = 1
     visited = []
 
     @grid.each_with_index do |row, ri|
@@ -154,22 +172,24 @@ class Board
         puts "Found marker at #{ri}, #{ci}"
 
         visited << [ri, ci]
-        length += 1
+        length = 1
 
         max = [length, max].max
 
-        while (ri + inc) < (@grid.length - 1) && (ci + inc) < @grid[ri].length
+        length = count_down([ri, ci], marker, visited)
+        max = [length, max].max
+        # while (ri + inc) < (@grid.length - 1) && (ci + inc) < @grid[ri].length
 
-          @grid[ri + inc][ci + inc] == marker ? length += 1 : break
-          visited << [(ri + inc), (ci + inc)]
-          puts "Length is now #{length}"
-          max = [length, max].max
+        #   @grid[ri + inc][ci + inc] == marker ? length += 1 : break
+        #   visited << [(ri + inc), (ci + inc)]
+        #   puts "Length is now #{length}"
+        #   max = [length, max].max
 
-          return 4 if length == 4
+        #   return 4 if length == 4
 
-          inc += 1
+        #   inc += 1
 
-        end
+        # end
       end
     end
     max
@@ -180,6 +200,9 @@ class Board
     up = diag_up(marker)
     puts 'Checking falling'
     down = diag_down(marker)
+
+    puts "Up: #{up}"
+    puts "Down: #{down}"
 
     [up, down].max
   end
