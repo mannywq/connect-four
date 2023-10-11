@@ -17,8 +17,9 @@ class Board
   end
 
   def open?(col)
-    (@grid.length - 1).downto(0) do |i|
-      return true if @grid[i][col - 1] == empty_circle
+    col = col.to_i
+    (@grid.length - 1).downto(1) do |i|
+      return true if @grid[i][(col - 1)] == empty_circle
     end
     false
   end
@@ -33,10 +34,11 @@ class Board
   end
 
   def place_marker(marker, col)
+    col = col.to_i
     return false unless open?(col)
 
-    (@grid.length - 1).downto(0) do |row|
-      next unless @grid[row][col - 1] == empty_circle
+    (@grid.length - 1).downto(1) do |row|
+      next unless @grid[row][(col - 1)] == empty_circle
 
       @grid[row][col - 1] = marker
       return true
@@ -44,79 +46,139 @@ class Board
     end
   end
 
-  def check_next?(pos, direction = 'x+', marker)
-    y, x = pos
+  def is_winner?(marker)
+    directions = []
 
-    return false if pos.any?(&:negative?)
+    directions << hor_row(marker)
+    directions << vert_row(marker)
+    directions << diag_row(marker)
 
-    case direction
-    when 'x+'
-      x + 1 <= @grid[y].length && @grid[y][x + 1] == marker
-    when 'y+'
+    # p directions.inspect
 
-      puts "Checking for #{marker}"
-      y + 1 <= @grid.length - 1 && @grid[y + 1][x] == marker
-    when 'y-'
-      puts "Checking for #{marker}"
-      (y - 1).negative? == false && @grid[y - 1][x] == marker
-    when 'x-'
-      (x - 1).negative? == false && @grid[y][x - 1] == marker
-    end
+    directions.include?(4)
   end
 
-  def vert_row(col, marker)
-    return false if col < 1 || col > @grid.length - 1
-
+  def vert_row(marker)
     length = 0
     max = 0
+    visited = []
 
-    (@grid.length - 1).downto(0) do |row|
-      length += 1 if @grid[row][col - 1] == marker
-      max = length if length > max
-      length = 0 if @grid[row][col - 1] != marker
-      return 4 if length == 4
+    @grid.each_with_index do |row, ri|
+      row.each_with_index do |_col, ci|
+        next unless @grid[ri][ci] == marker
+        next if visited.include?([ri, ci])
+
+        # puts "Found match at #{ri}, #{ci}"
+
+        visited << [ri, ci]
+
+        length = count_vert([ri, ci], marker, visited)
+        max = [length, max].max
+      end
     end
-    [length, max].max
+    # puts "Returning #{max}"
+    max
   end
 
   def hor_row(marker)
     length = 0
     max = 0
+    visited = []
 
-    (@grid.length - 1).downto(0) do |row|
-      (0..(@grid[row].length - 1)).each do |col|
-        length += 1 if @grid[row][col] == marker
-        max = length if length > max
-        length = 0 if @grid[row][col] != marker
-        return 4 if length == 4
+    @grid.each_with_index do |row, ri|
+      row.each_with_index do |_col, ci|
+        next unless @grid[ri][ci] == marker
+        next if visited.include?([ri, ci])
+
+        visited << [ri, ci]
+
+        length = count_horz([ri, ci], marker, visited)
+        max = [length, max].max
       end
     end
-    p length
-    p max
-    [length, max].max
+    max
   end
 
-  def diag_up(marker, _start_col = 1)
+  def diag_up(marker)
     length = 0
     max = 0
     visited = []
 
-    (@grid.length - 1).downto(0) do |row|
-      (@grid[0].length - 1).downto(0) do |col|
-        next unless @grid[row][col] == marker
-        next if visited.include?([row, col])
+    @grid.each_with_index do |row, ri|
+      row.each_with_index do |_col, ci|
+        next unless @grid[ri][ci] == marker
+        next if visited.include?([ri, ci])
 
-        puts "Found marker at #{row}, #{col}"
-        visited << [row, col]
-        length = 1
-        max = [length, max].max
+        visited << [ri, ci]
 
-        length = count_up([row, col], marker, visited)
+        length = count_up([ri, ci], marker, visited)
         max = [length, max].max
       end
     end
-    puts "Max is #{max}"
     max
+  end
+
+  def diag_down(marker)
+    length = 0
+    max = 0
+    visited = []
+
+    @grid.each_with_index do |row, ri|
+      row.each_with_index do |_col, ci|
+        next unless @grid[ri][ci] == marker
+
+        next if visited.include?([ri, ci])
+
+        visited << [ri, ci]
+
+        length = count_down([ri, ci], marker, visited)
+        max = [length, max].max
+      end
+    end
+    max
+  end
+
+  def diag_row(marker)
+    up = diag_up(marker)
+    down = diag_down(marker)
+
+    [up, down].max
+  end
+
+  private
+
+  def count_vert(pos, marker, visited)
+    row, col = pos
+    length = 1
+    inc = 1
+
+    while (row - inc) >= 0
+
+      @grid[row - inc][col] == marker ? length += 1 : break
+      visited << [(row - inc), col]
+      return 4 if length == 4
+
+      inc += 1
+
+    end
+    length
+  end
+
+  def count_horz(pos, marker, visited)
+    row, col = pos
+    length = 1
+    inc = 1
+
+    while (col + inc) < @grid[0].length
+
+      @grid[row][col + inc] == marker ? length += 1 : break
+      visited << [row, (col + inc)]
+      return 4 if length == 4
+
+      inc += 1
+
+    end
+    length
   end
 
   def count_up(pos, marker, visited)
@@ -128,14 +190,12 @@ class Board
     while (row - row_inc).positive? && (col + col_inc) < (@grid[0].length - 1)
       @grid[row - row_inc][col + col_inc] == marker ? length += 1 : break
       visited << [(row - row_inc), (col + col_inc)]
-      puts "Length is now #{length}"
       return 4 if length == 4
 
       row_inc += 1
       col_inc += 1
 
     end
-    puts "Returning #{length}"
     length
   end
 
@@ -147,63 +207,11 @@ class Board
     while (row + inc) <= (@grid.length - 1) && (col + inc) <= (@grid[0].length - 1)
       @grid[row + inc][col + inc] == marker ? length += 1 : break
       visited << [(row + inc), (col + inc)]
-      puts "Length is now #{length}"
       return 4 if length == 4
 
       inc += 1
 
     end
-    puts "Returning #{length}"
     length
-  end
-
-  def diag_down(marker)
-    length = 0
-    max = 0
-    # inc = 1
-    visited = []
-
-    @grid.each_with_index do |row, ri|
-      row.each_with_index do |_col, ci|
-        next unless @grid[ri][ci] == marker
-
-        next if visited.include?([ri, ci])
-
-        puts "Found marker at #{ri}, #{ci}"
-
-        visited << [ri, ci]
-        length = 1
-
-        max = [length, max].max
-
-        length = count_down([ri, ci], marker, visited)
-        max = [length, max].max
-        # while (ri + inc) < (@grid.length - 1) && (ci + inc) < @grid[ri].length
-
-        #   @grid[ri + inc][ci + inc] == marker ? length += 1 : break
-        #   visited << [(ri + inc), (ci + inc)]
-        #   puts "Length is now #{length}"
-        #   max = [length, max].max
-
-        #   return 4 if length == 4
-
-        #   inc += 1
-
-        # end
-      end
-    end
-    max
-  end
-
-  def diag_row(marker)
-    puts 'Checking rising'
-    up = diag_up(marker)
-    puts 'Checking falling'
-    down = diag_down(marker)
-
-    puts "Up: #{up}"
-    puts "Down: #{down}"
-
-    [up, down].max
   end
 end

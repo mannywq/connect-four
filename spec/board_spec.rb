@@ -14,9 +14,9 @@ describe Board do
     end
   end
 
-  describe '#print_board' do
-    skip
-  end
+  # describe '#print_board' do
+  #   skip
+  # end
 
   describe '#place_marker' do
     subject(:board) { described_class.new }
@@ -68,8 +68,23 @@ describe Board do
     end
   end
 
-  describe '#has_winner?(player)' do
-    xit 'it returns true when player has secured a winning combination' do
+  describe '#is_winner?(marker)' do
+    let(:row_board) { described_class.new }
+    it 'it returns true when a player has secured a winning combination' do
+      marker = 'X'
+      marker2 = 'O'
+
+      row_board.place_marker(marker, 1)
+      row_board.place_marker(marker2, 2)
+      row_board.place_marker(marker, 2)
+      2.times { row_board.place_marker(marker2, 3) }
+      row_board.place_marker(marker, 3)
+      3.times { row_board.place_marker(marker2, 4) }
+      row_board.place_marker(marker, 4)
+
+      row_board.print_board
+
+      expect(row_board.is_winner?(marker)).to be true
     end
   end
 
@@ -80,7 +95,7 @@ describe Board do
 
       row_board.print_board
       marker = 'X'
-      expect(row_board.vert_row(1, marker)).to eq 1
+      expect(row_board.vert_row(marker)).to eq 1
     end
     it 'Should return the number of markers in a row when more than 1' do
       marker = 'X'
@@ -88,14 +103,14 @@ describe Board do
       2.times { row_board.place_marker('X', 1) }
       row_board.print_board
 
-      expect(row_board.vert_row(1, marker)).to eq 2
+      expect(row_board.vert_row(marker)).to eq 2
     end
     it 'Should return 4 when 4 or more markers are in a row' do
       marker = 'X'
 
       5.times { row_board.place_marker(marker, 1) }
       row_board.print_board
-      expect(row_board.vert_row(1, marker)).to eq 4
+      expect(row_board.vert_row(marker)).to eq 4
     end
     it 'should return max consecutive values when values are mixed' do
       marker1 = 'X'
@@ -107,7 +122,7 @@ describe Board do
 
       row_board.print_board
 
-      expect(row_board.vert_row(1, marker1)).to eq 3
+      expect(row_board.vert_row(marker1)).to eq 3
     end
   end
 
@@ -192,7 +207,7 @@ describe Board do
 
       row_board.print_board
 
-      expect(row_board.diag_up(marker, 2)).to eq 4
+      expect(row_board.diag_up(marker)).to eq 4
     end
   end
 

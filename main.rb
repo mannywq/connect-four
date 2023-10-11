@@ -1,5 +1,11 @@
-require_relative './lib/board'
+require_relative './lib/game'
+require_relative './lib/player'
 
-board = Board.new
+include Markers
 
-board.print_board
+player1 = Player.new(yellow_circle, 'Taro')
+player2 = Player.new(blue_circle)
+
+game = Game.new([player1, player2])
+
+game.play
